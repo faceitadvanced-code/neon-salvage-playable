@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#070816">
+  <title>Neon Salvage — AI Playable</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --cyan: #57f6ff;
+      --violet: #8b5cff;
+      --pink: #ff3d92;
+      --ink: #070816;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; min-height: 100%; background: #04050d; overflow: hidden; }
+    body {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(85, 59, 196, .28), transparent 42%),
+        linear-gradient(145deg, #070919 0%, #02030a 100%);
+      overscroll-behavior: none;
+    }
+    .phone {
+      position: relative;
+      width: min(100vw, calc(100dvh * .557));
+      height: min(100dvh, calc(100vw * 1.795));
+      max-width: 430px;
+      max-height: 770px;
+      overflow: hidden;
+      isolation: isolate;
+      background: var(--ink);
+      box-shadow: 0 30px 90px rgba(0,0,0,.65), 0 0 0 1px rgba(125,245,255,.14);
+      touch-action: none;
+      user-select: none;
+    }
+    canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+    .hud {
+      position: absolute;
+      inset: max(16px, env(safe-area-inset-top)) 16px auto;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      z-index: 3;
+      pointer-events: none;
+      color: white;
+      text-shadow: 0 2px 12px rgba(0,0,0,.8);
+    }
+    .hud__label { font-size: 10px; letter-spacing: .18em; color: #8ba2bb; font-weight: 800; }
+    .hud__value { font-size: 25px; line-height: 1; font-weight: 900; letter-spacing: -.04em; }
+    .hud__center {
+      min-width: 80px;
+      padding: 8px 11px;
+      text-align: center;
+      border: 1px solid rgba(87,246,255,.24);
+      border-radius: 999px;
+      background: rgba(3,10,22,.48);
+      backdrop-filter: blur(8px);
+    }
+    .hud__right { text-align: right; }
+    .lives { color: var(--pink); letter-spacing: .1em; font-size: 16px; }
+    .progress {
+      position: absolute;
+      z-index: 3;
+      top: 79px;
+      left: 16px;
+      right: 16px;
+      height: 4px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,.09);
+      pointer-events: none;
+    }
+    .progress > span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+      box-shadow: 0 0 14px var(--cyan);
+      transition: width .16s ease-out;
+    }
+    .overlay {
+      position: absolute;
+      z-index: 8;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(4,5,15,.30), rgba(4,5,15,.84));
+      backdrop-filter: blur(3px);
+      transition: opacity .22s ease, visibility .22s ease;
+    }
+    .overlay[hidden] { display: none; }
+    .card { width: min(100%, 330px); animation: rise .5s cubic-bezier(.2,.8,.2,1); }
+    .eyebrow { color: var(--cyan); font-size: 11px; font-weight: 900; letter-spacing: .24em; text-transform: uppercase; }
+    h1 { margin: 11px 0 8px; font-size: clamp(38px, 11vw, 56px); line-height: .88; letter-spacing: -.065em; text-transform: uppercase; }
+    .gradient-text {
+      color: transparent;
+      background: linear-gradient(120deg, #fff 4%, var(--cyan) 44%, #b898ff 82%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      filter: drop-shadow(0 0 24px rgba(87,246,255,.28));
+    }
+    .copy { margin: 15px auto 22px; max-width: 290px; color: #b4c0d3; font-size: 14px; line-height: 1.55; }
+    .legend { display: flex; justify-content: center; gap: 18px; margin: 18px 0 24px; font-size: 12px; font-weight: 800; color: #dceaff; }
+    .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 7px; transform: rotate(45deg); }
+    .legend .core { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+    .legend .mine { background: var(--pink); box-shadow: 0 0 12px var(--pink); }
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 15px;
+      padding: 16px 18px;
+      color: #041218;
+      background: linear-gradient(110deg, #74fbff, #8affc1);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 12px 35px rgba(87,246,255,.24), inset 0 1px rgba(255,255,255,.7);
+      transition: transform .12s ease, filter .12s ease;
+    }
+    button:active { transform: scale(.97); filter: brightness(.9); }
+    .secondary { margin-top: 10px; color: #d5e2f2; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.13); }
+    .end-score { margin: 16px 0 22px; font-size: 16px; color: #c6d4e9; }
+    .end-score strong { display: block; color: white; font-size: 48px; line-height: 1; }
+    .tip {
+      position: absolute;
+      z-index: 4;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      left: 50%;
+      translate: -50% 0;
+      width: max-content;
+      color: rgba(218,239,255,.72);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      pointer-events: none;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(18px) scale(.97); } }
+    @keyframes pulse { 50% { opacity: .45; transform: translateY(3px); } }
+    @media (min-width: 700px) {
+      .phone { border-radius: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone" id="gameShell">
+    <canvas id="game" width="390" height="700" aria-label="Neon Salvage game arena"></canvas>
+
+    <section class="hud" id="hud" hidden aria-label="Game status">
+      <div><div class="hud__label">CORES</div><div class="hud__value" id="score">0/14</div></div>
+      <div class="hud__center"><div class="hud__label">TIME</div><div class="hud__value" id="time">30</div></div>
+      <div class="hud__right"><div class="hud__label">SHIELD</div><div class="lives" id="lives">◆◆◆</div></div>
+    </section>
+    <div class="progress" id="progress" hidden><span id="progressFill"></span></div>
+    <div class="tip" id="tip" hidden>drag to steer the magnet</div>
+
+    <section class="overlay" id="startScreen">
+      <div class="card">
+        <div class="eyebrow">Playable prototype · 30 sec</div>
+        <h1 class="gradient-text">Neon<br>Salvage</h1>
+        <p class="copy">Guide the magnetic drone. Secure 14 energy cores before the signal collapses.</p>
+        <div class="legend"><span><i class="core"></i>Collect cores</span><span><i class="mine"></i>Avoid mines</span></div>
+        <button id="startButton" type="button">Start salvage</button>
+      </div>
+    </section>
+
+    <section class="overlay" id="endScreen" hidden>
+      <div class="card">
+        <div class="eyebrow" id="endEyebrow">Mission complete</div>
+        <h1 class="gradient-text" id="endTitle">CORE SECURED</h1>
+        <p class="end-score"><strong id="endScore">14</strong> energy cores recovered</p>
+        <button id="ctaButton" type="button">Play full game</button>
+        <button class="secondary" id="replayButton" type="button">Replay</button>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="./src/game.js"></script>
+</body>
+</html>

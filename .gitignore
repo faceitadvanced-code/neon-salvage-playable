@@ -1,0 +1,7 @@
+node_modules/
+test-results/
+playwright-report/
+artifacts/video-tmp/
+artifacts/*.webm
+artifacts/video-*.jpg
+.DS_Store
