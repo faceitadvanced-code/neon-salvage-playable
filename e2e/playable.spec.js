@@ -4,7 +4,7 @@ test('playable supports start, touch movement, win, CTA and restart', async ({ p
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
 
-  await page.goto('/');
+  await page.goto('./');
 
   await expect(page).toHaveTitle('Neon Salvage — AI Playable');
   await expect(page.locator('canvas')).toBeVisible();
@@ -38,7 +38,7 @@ test('playable supports start, touch movement, win, CTA and restart', async ({ p
 });
 
 test('playable renders a loss state', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await page.getByRole('button', { name: /start salvage/i }).click();
   await page.evaluate(() => window.__playableDebug.forceLose());
 
