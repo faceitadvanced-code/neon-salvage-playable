@@ -2,6 +2,16 @@
 
 A mobile-first 30-second playable concept created as an AI-assisted portfolio project for a Junior AI Game Designer application.
 
+## Live build
+
+**Play now:** https://faceitadvanced-code.github.io/neon-salvage-playable/
+
+**Source:** https://github.com/faceitadvanced-code/neon-salvage-playable
+
+**Demo video:** [`artifacts/neon-salvage-demo.mp4`](artifacts/neon-salvage-demo.mp4)
+
+![Neon Salvage gameplay](artifacts/gameplay.png)
+
 ## Gameplay
 
 Guide a magnetic drone horizontally, collect 14 cyan energy cores, and avoid magenta mines before the timer expires.
